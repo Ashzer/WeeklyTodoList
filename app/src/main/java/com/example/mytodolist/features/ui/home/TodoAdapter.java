@@ -31,10 +31,10 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder> im
         notifyItemRangeChanged(0,todos.size());
     }
 
-//    public void insertItem(int position, Todo todo) {
-//        this.todos.add(position, todo);
-//        notifyItemInserted(position);
-//    }
+    public void insertAt(int position, Todo todo) {
+        this.todos.add(position, todo);
+        notifyItemInserted(position);
+    }
 
     public void refreshByTodoId(long id) {
 

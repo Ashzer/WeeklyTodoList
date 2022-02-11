@@ -29,7 +29,17 @@ public class HomeFragment extends BaseFragment implements TodoDeleteCallback, To
 
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
-        viewModel.getCurrentTodoList().observe(this, todos -> adapter.refreshItems(todos));
+        viewModel.getCurrentTodoList().observe(this, todos -> {
+            if(todos.size()>2) {
+                if (adapter.todos.contains(todos.get(1)) && (adapter.todos.size()+1)==todos.size() ){
+                    adapter.insertAt(0, todos.get(0));
+                }else{
+                    adapter.refreshItems(todos);
+                }
+            }else{
+                adapter.refreshItems(todos);
+            }
+        });
         viewModel.getCurrentResult().observe(this, aLong -> viewModel.getTodoList());
         viewModel.getUpdateResult().observe(this, nInteger -> viewModel.getTodoList());
         viewModel.getUserData().observe(this, dataClass -> {Log.d(this.getClass().toString(), dataClass.toString());
