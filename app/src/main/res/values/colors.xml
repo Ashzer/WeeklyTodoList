@@ -14,4 +14,6 @@
     <color name="selection_3">#FFF46161</color>
     <color name="selection_4">#FFF89D5B</color>
     <color name="selection_5">#FFFFCF62</color>
+    <color name="date_normal">#FFDDDDDD</color>
+    <color name="date_selected">#FF999999</color>
 </resources>

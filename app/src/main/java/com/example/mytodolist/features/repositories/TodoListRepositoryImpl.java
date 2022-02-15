@@ -34,4 +34,9 @@ public class TodoListRepositoryImpl implements TodoListRepository{
     public int updateTodo(TodoEntity todo) {
         return dao.updateTodo(todo);
     }
+
+    @Override
+    public List<TodoEntity> getTodoListADay(String date) {
+        return dao.getTodoListADay(date);
+    }
 }

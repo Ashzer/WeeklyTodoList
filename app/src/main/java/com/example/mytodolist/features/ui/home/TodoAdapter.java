@@ -27,8 +27,10 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder> im
     }
 
     public void refreshItems(List<Todo> todos) {
+        this.todos.clear();
         this.todos = todos;
-        notifyItemRangeChanged(0,todos.size());
+        notifyDataSetChanged();
+        //notifyItemRangeChanged(0,todos.size());
     }
 
     public void insertAt(int position, Todo todo) {
@@ -96,8 +98,9 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder> im
 
         void bind(Todo todo) {
             binding.itemTodoTitleTv.setText(todo.getTitle());
-            binding.itemTodoDateTv.setText(LocalDateStringConverter.localDateToString(todo.getDate()));
+            binding.itemTodoDateTv.setText(LocalDateStringConverter.localDateToString(todo.getStart()));
             binding.itemTodoContentEt.setText(todo.getContent());
+            binding.itemTodoDeadlineTv.setText(LocalDateStringConverter.localDateToString(todo.getDeadline()));
             binding.getRoot().getBackground().setColorFilter(todo.getColor(), PorterDuff.Mode.SRC_IN);
         }
     }

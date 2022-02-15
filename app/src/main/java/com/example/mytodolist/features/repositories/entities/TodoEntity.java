@@ -16,15 +16,18 @@ public class TodoEntity implements Serializable {
 
     private int color;
     private String title;
-    private LocalDate date;
+    private LocalDate start;
+    private LocalDate deadline;
     private String content;
 
-    public TodoEntity(long id, int color, String title, LocalDate date, String content) {
+
+    public TodoEntity(long id, int color, String title, LocalDate start, LocalDate deadline, String content) {
         this.id = id;
         this.color = color;
         this.title = title;
-        this.date = date;
+        this.start = start;
         this.content = content;
+        this.deadline = deadline;
     }
 
     public long getId() {
@@ -51,12 +54,20 @@ public class TodoEntity implements Serializable {
         this.title = title;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDate getStart() {
+        return start;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
+    public void setStart(LocalDate start) {
+        this.start = start;
+    }
+
+    public LocalDate getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(LocalDate deadline) {
+        this.deadline = deadline;
     }
 
     public String getContent() {
@@ -68,7 +79,7 @@ public class TodoEntity implements Serializable {
     }
 
     public Todo toTodo() {
-        return new Todo(id, color, title, date, content);
+        return new Todo(id, color, title, start, deadline, content);
     }
 
 }

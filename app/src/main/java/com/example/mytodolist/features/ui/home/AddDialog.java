@@ -1,8 +1,7 @@
 package com.example.mytodolist.features.ui.home;
 
-import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -11,21 +10,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
+import android.widget.DatePicker;
 import android.widget.RadioGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mytodolist.R;
+import com.example.mytodolist.core.calendar.utils.LocalDateUtils;
 import com.example.mytodolist.databinding.DialogAddTodoBinding;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Objects;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -33,12 +30,15 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class AddDialog extends DialogFragment {
     DialogAddTodoBinding binding;
+    DialogFragmentSaveTodoListener dialogFragmentSaveTodoListener;
+    DialogFragmentCancelTodoListener dialogFragmentCancelTodoListener;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setCancelable(false);
 
-        Log.d(this.getClass().toString(),this.getTag());
+        Log.d(this.getClass().toString(), this.getTag());
 
     }
 
@@ -51,10 +51,14 @@ public class AddDialog extends DialogFragment {
         return binding.getRoot();
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 구현부
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        return new Dialog(getActivity(), getTheme()){
+        return new Dialog(getActivity(), getTheme()) {
             @Override
             public void onBackPressed() {
                 super.onBackPressed();
@@ -68,69 +72,74 @@ public class AddDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         binding.dialogAddTodoTitleEt.requestFocus();
-        if(Objects.equals(this.getTag(), new Const().UPDATE_DIALOG)){
+
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
+                binding.dialogAddDeadlineDateTv.setText(LocalDateUtils.getDateFullName(LocalDate.of(i, i1 + 1, i2)));
+            }
+        }, LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1, LocalDate.now().getDayOfMonth());
+        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
+
+        if (Objects.equals(this.getTag(), new Const().UPDATE_DIALOG)) {
             Bundle mArgs = getArguments();
             Todo oldTodo = Objects.requireNonNull(mArgs).getParcelable("todo");
             binding.dialogAddTodoTitleEt.setText(oldTodo.getTitle());
             binding.dialogAddTodoContentEt.setText(oldTodo.getContent());
+            binding.dialogAddDeadlineDateTv.setText(LocalDateUtils.getDateFullName(oldTodo.getDeadline()));
 
-            binding.dialogAddSaveBtn.setOnClickListener(view1 -> {
-                dialogFragmentSaveTodoListener.onSaved(
-                        new Todo(
-                                oldTodo.getId(),
-                                binding.dialogAddItemClo.getBackgroundTintList().getDefaultColor(),
-                                binding.dialogAddTodoTitleEt.getText().toString(),
-                                oldTodo.getDate(),
-                                binding.dialogAddTodoContentEt.getText().toString()
-                        )
-                );
+            LocalDate date = oldTodo.getDeadline();
+            datePickerDialog.updateDate(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
+
+            //저장버튼 리스너
+            updateOldTodo(oldTodo);
+
+            //원래 선택한 색상 확인하고 세팅
+            setOldBackgroundColor(oldTodo.getColor());
+
+            //수정 도중 취소
+            binding.dialogAddCancelBtn.setOnClickListener(v -> {
+                dialogFragmentCancelTodoListener.onCancel(oldTodo.getId());
                 dismiss();
             });
 
-            binding.dialogAddColorSelectionRg.check(R.id.dialogAddColor1Rb);
-            for(int childAt = 0 ; childAt < binding.dialogAddColorSelectionRg.getChildCount() ; childAt++){
-                int childAtColor = binding.dialogAddColorSelectionRg.getChildAt(childAt).getBackgroundTintList().getDefaultColor();
-                if(childAtColor == oldTodo.getColor()){
-                    RadioGroup rg = binding.dialogAddColorSelectionRg;
-                    rg.check(rg.getChildAt(childAt).getId());
-                    binding.dialogAddItemClo.setBackgroundTintList(rg.getChildAt(childAt).getBackgroundTintList());
-                    Log.d(this.getClass().toString(), childAt+ " should've selected.");
-                    break;
-                }
-            }
+        } else {
+            //새 todo
 
-            binding.dialogAddCancelBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    dialogFragmentCancelTodoListener.onCancel(oldTodo.getId());
-                    dismiss();
-                }
-            });
-
-        }else{
-
-            binding.dialogAddSaveBtn.setOnClickListener(view1 -> {
-                dialogFragmentSaveTodoListener.onSaved(
-                        new Todo(
-                                0,
-                                binding.dialogAddItemClo.getBackgroundTintList().getDefaultColor(),
-                                binding.dialogAddTodoTitleEt.getText().toString(),
-                                LocalDate.now(),
-                                binding.dialogAddTodoContentEt.getText().toString()
-                        )
-                );
-                dismiss();
-            });
+            //데드라인 초기화
+            binding.dialogAddDeadlineDateTv.setText(LocalDateUtils.getDateFullName(LocalDate.now()));
+            //라디오 버튼 선택 초기화
             binding.dialogAddColorSelectionRg.check(R.id.dialogAddColor1Rb);
 
-            binding.dialogAddCancelBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    dismiss();
-                }
-            });
+            //저장 버튼 리스너
+            saveNewTodo();
+
+            //취소 버튼 리스너
+            binding.dialogAddCancelBtn.setOnClickListener(v -> dismiss());
         }
 
+        //라디오 버튼 선택에 따라서 배경색 전환
+        setTodoBackgroundColorListener();
+
+        //현재 날짜 기준으로 Date Picker 화면에 띄움
+        showDatePickerListener(datePickerDialog);
+    }
+    //원래 선택한 색상 확인하고 세팅
+    void setOldBackgroundColor(int oldColor) {
+        for (int childAt = 0; childAt < binding.dialogAddColorSelectionRg.getChildCount(); childAt++) {
+            int childAtColor = binding.dialogAddColorSelectionRg.getChildAt(childAt).getBackgroundTintList().getDefaultColor();
+            if (childAtColor == oldColor) {
+                RadioGroup rg = binding.dialogAddColorSelectionRg;
+                rg.check(rg.getChildAt(childAt).getId());
+                binding.dialogAddItemClo.setBackgroundTintList(rg.getChildAt(childAt).getBackgroundTintList());
+                Log.d(this.getClass().toString(), childAt + " should've selected.");
+                break;
+            }
+        }
+    }
+    //라디오 버튼 선택에 따라서 배경색 전환
+    void setTodoBackgroundColorListener() {
         binding.dialogAddColorSelectionRg.setOnCheckedChangeListener((radioGroup, i) -> {
             ColorStateList tintList;
             switch (i) {
@@ -152,27 +161,68 @@ public class AddDialog extends DialogFragment {
                     break;
             }
             binding.dialogAddItemClo.setBackgroundTintList(tintList);
-
         });
-
-
     }
 
-    public interface DialogFragmentSaveTodoListener{
-        void onSaved(Todo todo);
+    //저장버튼 리스너
+    void updateOldTodo(Todo oldTodo) {
+        binding.dialogAddSaveBtn.setOnClickListener(v -> {
+            LocalDate newDeadline = LocalDateUtils.getDateFromFullName(binding.dialogAddDeadlineDateTv.getText().toString());
+            dialogFragmentSaveTodoListener.onSaved(
+                    new Todo(
+                            oldTodo.getId(),
+                            binding.dialogAddItemClo.getBackgroundTintList().getDefaultColor(),
+                            binding.dialogAddTodoTitleEt.getText().toString(),
+                            oldTodo.getStart(),
+                            newDeadline,
+                            binding.dialogAddTodoContentEt.getText().toString()
+                    )
+            );
+            dismiss();
+        });
     }
-    DialogFragmentSaveTodoListener dialogFragmentSaveTodoListener;
+    //저장 버튼 리스너
+    void saveNewTodo() {
+        binding.dialogAddSaveBtn.setOnClickListener(v -> {
+            LocalDate newDeadline = LocalDateUtils.getDateFromFullName(binding.dialogAddDeadlineDateTv.getText().toString());
+            dialogFragmentSaveTodoListener.onSaved(
+                    new Todo(
+                            0,
+                            binding.dialogAddItemClo.getBackgroundTintList().getDefaultColor(),
+                            binding.dialogAddTodoTitleEt.getText().toString(),
+                            LocalDate.now(),
+                            newDeadline,
+                            binding.dialogAddTodoContentEt.getText().toString()
+                    )
+            );
+            dismiss();
+        });
+    }
+    //현재 날짜 기준으로 Date Picker 화면에 띄움
+    void showDatePickerListener(DatePickerDialog datePickerDialog) {
+        binding.dialogAddDatePickClo.setOnClickListener(v -> {
+            LocalDate date = LocalDateUtils.getDateFromFullName(binding.dialogAddDeadlineDateTv.getText().toString());
+            datePickerDialog.updateDate(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
+            datePickerDialog.show();
+        });
+    }
 
-    public void saveTodo(DialogFragmentSaveTodoListener listener){
+    public void saveTodo(DialogFragmentSaveTodoListener listener) {
         dialogFragmentSaveTodoListener = listener;
     }
 
-    public interface DialogFragmentCancelTodoListener{
-        void onCancel(long position);
-    }
-    DialogFragmentCancelTodoListener dialogFragmentCancelTodoListener;
-
-    public void cancelTodo(DialogFragmentCancelTodoListener listener){
+    public void cancelTodo(DialogFragmentCancelTodoListener listener) {
         dialogFragmentCancelTodoListener = listener;
     }
+
+    //
+    public interface DialogFragmentSaveTodoListener {
+        void onSaved(Todo todo);
+    }
+
+    //수정 중 취소하면 수정하던 todo의 포지션 반환. 이후 동작은 Fragment에 정의되어 있음
+    public interface DialogFragmentCancelTodoListener {
+        void onCancel(long position);
+    }
+    //////////////////////////////////////////////////////////////////////////
 }

@@ -2,4 +2,8 @@
     <string name="app_name">TODO List</string>
     <string name="save">저장</string>
     <string name="cancel">취소</string>
+
+    <string name="calender_previous">previous</string>
+    <string name="calender_next">next</string>
+    <string name="add_todo_item">Add Todo Item</string>
 </resources>

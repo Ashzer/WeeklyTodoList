@@ -13,16 +13,17 @@ public class Todo implements Parcelable {
     private long id;
     private int color;
     private String title;
-    private LocalDate date;
+    private LocalDate start;
+    private LocalDate deadline;
     private String content;
 
-
     @Inject
-    public Todo(long id, int color, String title, LocalDate date, String content) {
+    public Todo(long id, int color, String title, LocalDate start,LocalDate deadline, String content) {
         this.id = id;
         this.color = color;
         this.title = title;
-        this.date = date;
+        this.start = start;
+        this.deadline = deadline;
         this.content = content;
     }
 
@@ -31,7 +32,8 @@ public class Todo implements Parcelable {
         id = in.readLong();
         color = in.readInt();
         title = in.readString();
-        date = in.readParcelable(LocalDate.class.getClassLoader());
+        start = in.readParcelable(LocalDate.class.getClassLoader());
+        deadline = in.readParcelable(LocalDate.class.getClassLoader());
         content = in.readString();
     }
 
@@ -40,7 +42,8 @@ public class Todo implements Parcelable {
         dest.writeLong(id);
         dest.writeInt(color);
         dest.writeString(title);
-        dest.writeValue(date);
+        dest.writeValue(start);
+        dest.writeValue(deadline);
         dest.writeString(content);
     }
 
@@ -73,16 +76,20 @@ public class Todo implements Parcelable {
         return title;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDate getStart() {
+        return start;
     }
+    public LocalDate getDeadline() {
+        return deadline;
+    }
+
 
     public String getContent() {
         return content;
     }
 
     public TodoEntity toTodoEntity() {
-        return new TodoEntity(id, color, title, date, content);
+        return new TodoEntity(id, color, title, start,deadline, content);
     }
 
 }

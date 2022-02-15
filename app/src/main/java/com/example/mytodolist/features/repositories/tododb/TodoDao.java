@@ -6,6 +6,7 @@ import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
 
+import com.example.mytodolist.core.calendar.utils.LocalDateUtils;
 import com.example.mytodolist.features.repositories.entities.TodoEntity;
 
 import java.util.List;
@@ -17,8 +18,11 @@ public interface TodoDao {
     @Insert
     long saveTodo(TodoEntity todo);
 
-    @Query("select * from todolist order by date desc ,id desc")
+    @Query("select * from todolist order by start desc ,id desc")
     List<TodoEntity> getTodoList();
+
+    @Query("select * from todolist where :date >= start and :date <= deadline order by deadline asc,id desc")
+    List<TodoEntity> getTodoListADay(String date);
 
     @Delete
     void deleteTodo(TodoEntity todo);

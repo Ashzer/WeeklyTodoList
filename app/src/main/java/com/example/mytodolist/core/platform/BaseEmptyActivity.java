@@ -23,12 +23,12 @@ public abstract class BaseEmptyActivity extends BaseActivity{
 
         binding = ActivityEmptyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        setSupportActionBar(binding.emptyToolbar);
+       // setSupportActionBar(binding.emptyToolbar);
 
-        setAppbarTitle("is it?");
+        //setAppbarTitle("is it?");
     }
 
-    void setAppbarTitle(String title){
-        getSupportActionBar().setTitle(title);
-    }
+    //void setAppbarTitle(String title){
+//        getSupportActionBar().setTitle(title);
+//    }
 }

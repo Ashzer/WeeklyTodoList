@@ -9,4 +9,5 @@ public interface TodoListRepository {
     long saveTodo(TodoEntity todo);
     void deleteTodo(TodoEntity todo);
     int updateTodo(TodoEntity todo);
+    List<TodoEntity> getTodoListADay(String date);
 }

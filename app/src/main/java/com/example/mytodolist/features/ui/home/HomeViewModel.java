@@ -9,6 +9,7 @@ import com.example.mytodolist.core.platform.BaseViewModel;
 import com.example.mytodolist.features.repositories.network.DataClass;
 import com.example.mytodolist.features.repositories.network.GetNameUseCase;
 import com.example.mytodolist.features.repositories.tododb.usecases.DeleteTodoUseCase;
+import com.example.mytodolist.features.repositories.tododb.usecases.GetTodoListADay;
 import com.example.mytodolist.features.repositories.tododb.usecases.GetTodoListUseCase;
 import com.example.mytodolist.features.repositories.tododb.usecases.SaveTodoUseCase;
 import com.example.mytodolist.features.repositories.tododb.usecases.UpdateTodoUseCase;
@@ -30,6 +31,8 @@ public class HomeViewModel extends BaseViewModel {
     DeleteTodoUseCase deleteTodo;
     @Inject
     UpdateTodoUseCase updateTodo;
+    @Inject
+    GetTodoListADay getTodoListADay;
 
     @Inject
     GetNameUseCase getName;
@@ -53,6 +56,10 @@ public class HomeViewModel extends BaseViewModel {
 
     public void getTodoList() {
         todos.postValue(getTodoList.execute());
+    }
+
+    public void getTodoListADay(String date){
+        todos.setValue(getTodoListADay.execute(date));
     }
 
     public void deleteTodo(Todo todo) {
