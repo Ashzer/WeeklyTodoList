@@ -3,22 +3,27 @@ package com.example.mytodolist.features.ui.home;
 import android.animation.ObjectAnimator;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.GestureDetectorCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.mytodolist.core.calendar.SingleRowCalendarAdapter;
-import com.example.mytodolist.core.calendar.utils.LocalDateUtils;
 import com.example.mytodolist.core.platform.BaseFragment;
 import com.example.mytodolist.databinding.FragmentHomeBinding;
+import com.example.mytodolist.features.calendar.ScrollSpeedLinearLayoutManager;
+import com.example.mytodolist.features.calendar.SingleRowCalendarAdapter;
+import com.example.mytodolist.features.calendar.utils.LocalDateUtils;
 import com.example.mytodolist.features.repositories.tododb.LocalDateStringConverter;
 
 import java.time.LocalDate;
@@ -34,24 +39,25 @@ public class HomeFragment extends BaseFragment implements TodoDeleteCallback, To
     SingleRowCalendarAdapter calendarAdapter;
 
     Boolean isMenusFabOpen = false;
+    String check = "";
+
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
         viewModel.getCurrentTodoList().observe(this, todos -> {
-//            if (todos.size() > 2) {
-//                if (adapter.todos.contains(todos.get(1)) && (adapter.todos.size() + 1) == todos.size()) {
-//                    adapter.insertAt(0, todos.get(0));
-//                } else {
-//                    adapter.refreshItems(todos);
-//                }
-//            } else {
-            adapter.refreshItems(todos);
-//            }
+            adapter.refreshItems(todos, LocalDateUtils.getDateFromFullName(binding.calendarLo.calendarMonthTv.getText().toString()));
+            todos.forEach((todo) ->
+                    Log.d(this.getClass().toString(), "value = " + todo.toString())
+            );
         });
+
 
         viewModel.getCurrentResult().observe(this, aLong -> {
             String date = LocalDateStringConverter.localDateToString(LocalDateUtils.getDateFromFullName(binding.calendarLo.calendarMonthTv.getText().toString()));
@@ -65,8 +71,6 @@ public class HomeFragment extends BaseFragment implements TodoDeleteCallback, To
             Log.d(this.getClass().toString(), dataClass.toString());
             System.out.println(Thread.currentThread().getName());
         });
-
-
     }
 
     @Nullable
@@ -81,51 +85,74 @@ public class HomeFragment extends BaseFragment implements TodoDeleteCallback, To
         super.onDestroyView();
         binding = null;
     }
-    String check = "";
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        List<LocalDate> init = LocalDateUtils.getDates(10, 10, true);
+        int count = 20;
+        List<LocalDate> init = LocalDateUtils.getDates(count, count, true);
         calendarAdapter = new SingleRowCalendarAdapter(init);
-        binding.calendarLo.calendarBodyRv.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        binding.calendarLo.calendarBodyRv.setAdapter(calendarAdapter);
 
+        LinearLayoutManager linearLayoutManager = new ScrollSpeedLinearLayoutManager(getContext(), 10);
+        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        binding.calendarLo.calendarBodyRv.setLayoutManager(linearLayoutManager);
+        binding.calendarLo.calendarBodyRv.setAdapter(calendarAdapter);
 
         LinearLayoutManager layoutManager = (LinearLayoutManager) binding.calendarLo.calendarBodyRv.getLayoutManager();
         Point size = new Point();
         requireActivity().getWindowManager().getDefaultDisplay().getRealSize(size);
-        layoutManager.scrollToPositionWithOffset(calendarAdapter.indexOf(LocalDate.now()), (size.x) / 2 - 135);
 
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        requireActivity().getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
+        int itemWidth = (int) (70 * outMetrics.density + 1f);
+        int screenWidth = outMetrics.widthPixels;
+        layoutManager.scrollToPositionWithOffset(calendarAdapter.indexOf(LocalDate.now()), (screenWidth - itemWidth) / 2);
 
         binding.calendarLo.calendarBodyRv.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                int firstVisible = layoutManager.findFirstCompletelyVisibleItemPosition();
-                int lastVisible = layoutManager.findLastCompletelyVisibleItemPosition();
-
+                int firstVisible = layoutManager.findFirstVisibleItemPosition();
+                int lastVisible = layoutManager.findLastVisibleItemPosition();
 
                 LocalDate center = calendarAdapter.get(Math.round(((float) firstVisible + (float) lastVisible) / 2f));
 
-                if(!check.equals(LocalDateUtils.getDateFullName(center))){
+                if (!check.equals(LocalDateUtils.getDateFullName(center))) {
                     check = LocalDateUtils.getDateFullName(center);
                     String date = LocalDateStringConverter.localDateToString(LocalDateUtils.getDateFromFullName(check));
+
+//                    viewModel.getTodoPool().forEach((s, todo) ->
+//                            Log.d(this.getClass().toString(), "key = " + s + " , value = " + todo.toString())
+//                    );
                     viewModel.getTodoListADay(date);
-                }
+                    //adapter.refreshItems();
+                    Log.d(this.getClass().toString(), "" + calendarAdapter.getItemCount());
 
+                    int count = 15;
+                    if (firstVisible < count) {
+                       binding.calendarLo.calendarBodyRv.post(() -> {
+                            LocalDate from = calendarAdapter.get(0);
+                            List<LocalDate> pastFrom = LocalDateUtils.getPastDatesFrom(count, from);
+                            calendarAdapter.insertItemsHead(pastFrom);
+                            calendarAdapter.deleteItemsTail(count);
+
+                        });
+                        //     Log.d(this.getClass().toString(), String.valueOf(calendarAdapter.getItemCount()));
+                    }
+                    if (calendarAdapter.getItemCount() - lastVisible <= count) {
+                        binding.calendarLo.calendarBodyRv.post(() -> {
+                            LocalDate from = calendarAdapter.get(calendarAdapter.getItemCount() - 1);
+                            List<LocalDate> futureTo = LocalDateUtils.getFutureDatesFrom(count, from);
+                            calendarAdapter.insertItemsTail(futureTo);
+                            calendarAdapter.deleteItemsHead(count);
+
+                        });
+                        //     Log.d(this.getClass().toString(), String.valueOf(calendarAdapter.getItemCount()));
+                    }
+
+                }
                 binding.calendarLo.calendarMonthTv.setText(LocalDateUtils.getDateFullName(center));
-
-                if (firstVisible < 5) {
-                    LocalDate from = calendarAdapter.get(0);
-                    calendarAdapter.insertItemsHead(LocalDateUtils.getPastDatesFrom(20, from));
-                }
-                if (calendarAdapter.getItemCount() - lastVisible < 5) {
-                    LocalDate from = calendarAdapter.get(calendarAdapter.getItemCount() - 1);
-                    calendarAdapter.insertItemsTail(LocalDateUtils.getFutureDatesFrom(20, from));
-                }
             }
         });
 
@@ -158,11 +185,11 @@ public class HomeFragment extends BaseFragment implements TodoDeleteCallback, To
 
         binding.homeCreateFab.setOnClickListener(createFab -> {
             AddDialog dialog = new AddDialog();
-            dialog.show(requireActivity().getSupportFragmentManager(), new Const().ADD_DIALOG);
+            dialog.show(requireActivity().getSupportFragmentManager(), Const.ADD_DIALOG);
             dialog.saveTodo(todo -> viewModel.saveTodo(todo));
         });
 
-        viewModel.getTodoListADay(LocalDateStringConverter.localDateToString(LocalDate.now()));
+        viewModel.getTodoListADay(LocalDateUtils.getDateFullName(LocalDate.now()));
 
     }
 
@@ -178,7 +205,7 @@ public class HomeFragment extends BaseFragment implements TodoDeleteCallback, To
         args.putParcelable("todo", todo);
         AddDialog dialog = new AddDialog();
         dialog.setArguments(args);
-        dialog.show(requireActivity().getSupportFragmentManager(), new Const().UPDATE_DIALOG);
+        dialog.show(requireActivity().getSupportFragmentManager(), Const.UPDATE_DIALOG);
         dialog.saveTodo(newTodo -> {
             viewModel.updateTodo(newTodo);
             adapter.replaceAt(position, newTodo);
@@ -186,5 +213,4 @@ public class HomeFragment extends BaseFragment implements TodoDeleteCallback, To
 
         dialog.cancelTodo(id -> adapter.refreshByTodoId(id));
     }
-
 }

@@ -19,15 +19,17 @@ public class TodoEntity implements Serializable {
     private LocalDate start;
     private LocalDate deadline;
     private String content;
+    private Boolean isCompleted = false;
 
 
-    public TodoEntity(long id, int color, String title, LocalDate start, LocalDate deadline, String content) {
+    public TodoEntity(long id, int color, String title, LocalDate start, LocalDate deadline, String content, Boolean isCompleted ) {
         this.id = id;
         this.color = color;
         this.title = title;
         this.start = start;
         this.content = content;
         this.deadline = deadline;
+        this.isCompleted = isCompleted;
     }
 
     public long getId() {
@@ -78,8 +80,16 @@ public class TodoEntity implements Serializable {
         this.content = content;
     }
 
+    public Boolean getCompleted() {
+        return isCompleted;
+    }
+
+    public void setCompleted(Boolean completed) {
+        isCompleted = completed;
+    }
+
     public Todo toTodo() {
-        return new Todo(id, color, title, start, deadline, content);
+        return new Todo(id, color, title, start, deadline, content,isCompleted);
     }
 
 }

@@ -9,7 +9,45 @@
     android:backgroundTint="@color/background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/dialogAddDatePickClo"
+        android:id="@+id/dialogAddStartClo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/round_edges"
+        android:backgroundTint="#DDDDDD"
+        android:foregroundGravity="center|center_horizontal"
+        android:padding="10dp"
+        app:layout_constraintBottom_toTopOf="@id/dialogAddDeadlinePickClo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/dialogAddStartTitleTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="시작일 : "
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/dialogAddStartDateTv"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/dialogAddStartDateTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/dialogAddStartTitleTv"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/dialogAddDeadlinePickClo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
@@ -20,7 +58,7 @@
         app:layout_constraintBottom_toTopOf="@id/dialogAddItemClo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/dialogAddStartClo">
 
         <TextView
             android:id="@+id/dialogAddDeadlineTitleTv"
@@ -55,7 +93,7 @@
         app:layout_constraintBottom_toTopOf="@id/dialogAddColorsClo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dialogAddDatePickClo">
+        app:layout_constraintTop_toBottomOf="@id/dialogAddDeadlinePickClo">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/dialogAddTodoTopClo"

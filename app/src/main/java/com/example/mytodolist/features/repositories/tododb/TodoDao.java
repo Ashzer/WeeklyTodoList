@@ -6,7 +6,6 @@ import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import com.example.mytodolist.core.calendar.utils.LocalDateUtils;
 import com.example.mytodolist.features.repositories.entities.TodoEntity;
 
 import java.util.List;

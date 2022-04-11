@@ -2,6 +2,8 @@ package com.example.mytodolist.core.calendar.utils;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.example.mytodolist.features.calendar.utils.LocalDateUtils;
+
 import org.junit.Before;
 import org.junit.Test;
 

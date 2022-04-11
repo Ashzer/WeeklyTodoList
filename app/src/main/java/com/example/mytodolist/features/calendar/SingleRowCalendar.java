@@ -1,4 +1,4 @@
-package com.example.mytodolist.core.calendar;
+package com.example.mytodolist.features.calendar;
 
 import android.content.Context;
 import android.content.res.TypedArray;

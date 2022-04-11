@@ -1,11 +1,10 @@
-package com.example.mytodolist.core.calendar.utils;
-
-import static com.example.mytodolist.features.repositories.tododb.LocalDateStringConverter.localDateToString;
+package com.example.mytodolist.features.calendar.utils;
 
 import android.util.Log;
 
+import com.example.mytodolist.features.ui.home.Const;
+
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
@@ -14,13 +13,15 @@ import java.util.Locale;
 
 public class LocalDateUtils {
     public static String getDateFullName(LocalDate date) {
-        return  date.format(DateTimeFormatter.ofPattern("yy년 MM월 dd일 EEEE"));
+        return date.format(Const.mainDateTimeFormat);
     }
 
     public static LocalDate getDateFromFullName(String date) {
         try {
-            return LocalDate.parse(date, DateTimeFormatter.ofPattern("yy년 MM월 dd일 EEEE"));
-        }catch (Exception e){
+            Log.d("date_converter", "succeeded");
+            return LocalDate.parse(date, Const.mainDateTimeFormat);
+        } catch (Exception e) {
+            Log.d("date_converter", "failed");
             return LocalDate.now();
         }
     }
@@ -86,6 +87,28 @@ public class LocalDateUtils {
             pastDatesList.add(0, from.minusDays(i));
         }
         return pastDatesList;
+    }
+
+    public static List<LocalDate> getFromFutureToToday(LocalDate future, int calibration) {
+        List<LocalDate> futureDateList = new ArrayList<>();
+        int acc = 0;
+        while(future.isAfter(LocalDate.now().minusDays(calibration))){
+            future = future.minusDays(1);
+            futureDateList.add(0,future);
+            acc++;
+        }
+        return futureDateList;
+    }
+
+    public static List<LocalDate> getFromPastToToday(LocalDate past, int calibration) {
+        List<LocalDate> pastDateList = new ArrayList<>();
+        int acc = 0;
+        while(past.isBefore(LocalDate.now().plusDays(calibration))){
+            past = past.plusDays(1);
+            pastDateList.add(past);
+            acc++;
+        }
+        return pastDateList;
     }
 
     public static List<LocalDate> getDates(int pastDays, int futureDays, boolean includeCurrentDate) {

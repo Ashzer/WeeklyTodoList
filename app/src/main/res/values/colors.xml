@@ -16,4 +16,5 @@
     <color name="selection_5">#FFFFCF62</color>
     <color name="date_normal">#FFDDDDDD</color>
     <color name="date_selected">#FF999999</color>
+    <color name="screen_bar_color">#FF222222</color>
 </resources>

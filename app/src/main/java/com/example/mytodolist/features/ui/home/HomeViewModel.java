@@ -6,6 +6,8 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.mytodolist.core.platform.BaseViewModel;
+import com.example.mytodolist.features.calendar.Day;
+import com.example.mytodolist.features.calendar.utils.LocalDateUtils;
 import com.example.mytodolist.features.repositories.network.DataClass;
 import com.example.mytodolist.features.repositories.network.GetNameUseCase;
 import com.example.mytodolist.features.repositories.tododb.usecases.DeleteTodoUseCase;
@@ -14,8 +16,15 @@ import com.example.mytodolist.features.repositories.tododb.usecases.GetTodoListU
 import com.example.mytodolist.features.repositories.tododb.usecases.SaveTodoUseCase;
 import com.example.mytodolist.features.repositories.tododb.usecases.UpdateTodoUseCase;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -58,8 +67,8 @@ public class HomeViewModel extends BaseViewModel {
         todos.postValue(getTodoList.execute());
     }
 
-    public void getTodoListADay(String date){
-        todos.setValue(getTodoListADay.execute(date));
+    public void getTodoListADay(String date) {
+        todos.postValue(getTodoListADay.execute(date));
     }
 
     public void deleteTodo(Todo todo) {
@@ -85,4 +94,5 @@ public class HomeViewModel extends BaseViewModel {
     public MutableLiveData<DataClass> getUserData() {
         return userData;
     }
+
 }

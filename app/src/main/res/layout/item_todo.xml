@@ -10,81 +10,83 @@
     android:padding="10dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/itemTodoTopClo"
+        android:id="@+id/itemTodoTopHolder"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        app:layout_constraintBottom_toTopOf="@id/itemTodoBody1Clo"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="10dp"
+        app:layout_constraintBottom_toTopOf="@id/itemTodoBottomClo"
+        app:layout_constraintEnd_toStartOf="@id/itemTodoCheckClo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/itemTodoTitleTv"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/itemTodoTopClo"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
-            android:textColor="@color/black"
-            android:textSize="20sp"
+            android:padding="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/itemTodoTitleTv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/itemTodoBody1Clo"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toTopOf="@id/itemTodoBottomClo"
+        android:id="@+id/itemTodoCheckClo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/itemTodoTopClo">
-
-        <TextView
-            android:id="@+id/itemTodoDateTv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="right"
-            android:text="TextView"
-            android:textColor="@color/black"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/itemTodoTildeTv"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/itemTodoTildeTv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" ~ "
-            app:layout_constraintStart_toEndOf="@id/itemTodoDateTv"
-            app:layout_constraintEnd_toStartOf="@id/itemTodoDeadlineTv"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toEndOf="@id/itemTodoTopHolder"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/itemTodoDeadlineTv"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="TextView"
             android:textColor="@color/black"
-            app:layout_constraintTop_toTopOf="parent"
+            android:textSize="30sp"
+            app:layout_constraintBottom_toTopOf="@+id/button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="완료"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/itemTodoTildeTv"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/itemTodoDeadlineTv" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/itemTodoBottomClo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:padding="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/itemTodoCheckClo"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/itemTodoBody1Clo">
+        app:layout_constraintTop_toBottomOf="@+id/itemTodoTopHolder">
 
         <EditText
             android:id="@+id/itemTodoContentEt"

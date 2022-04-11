@@ -16,7 +16,6 @@ public class RetrofitService implements RetrofitApi{
         retrofitApi = this.retrofit.create(RetrofitApi.class);
     }
 
-
     @Override
     public Call<DataClass> getName(String id) {
         return retrofitApi.getName(id);

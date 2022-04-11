@@ -10,9 +10,11 @@ public class SaveTodoUseCase {
     TodoListRepository repository;
 
     @Inject
-    public SaveTodoUseCase(){}
+    public SaveTodoUseCase() {
+    }
 
-    public long execute(Todo todo){
+    public long execute(Todo todo) {
         return repository.saveTodo(todo.toTodoEntity());
     }
+
 }

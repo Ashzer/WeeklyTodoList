@@ -13,16 +13,19 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.DatePicker;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.mytodolist.R;
-import com.example.mytodolist.core.calendar.utils.LocalDateUtils;
+import com.example.mytodolist.features.calendar.utils.LocalDateUtils;
 import com.example.mytodolist.databinding.DialogAddTodoBinding;
 
 import java.time.LocalDate;
+import java.time.chrono.ChronoLocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -67,6 +70,24 @@ public class AddDialog extends DialogFragment {
         };
     }
 
+    DatePickerDialog getDatePicker(TextView tv){
+        return new DatePickerDialog(requireContext(), new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
+                String newDate =LocalDateUtils.getDateFullName(LocalDate.of(i, i1 + 1, i2));
+                tv.setText(newDate);
+
+                if(newDate.compareTo(binding.dialogAddDeadlineDateTv.getText().toString()) > 0){
+                    binding.dialogAddDeadlineDateTv.setText(newDate);
+                }
+
+                if(newDate.compareTo(binding.dialogAddStartDateTv.getText().toString()) <0 ){
+                    binding.dialogAddStartDateTv.setText(newDate);
+                }
+            }
+        }, LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1, LocalDate.now().getDayOfMonth());
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -74,13 +95,9 @@ public class AddDialog extends DialogFragment {
         binding.dialogAddTodoTitleEt.requestFocus();
 
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                binding.dialogAddDeadlineDateTv.setText(LocalDateUtils.getDateFullName(LocalDate.of(i, i1 + 1, i2)));
-            }
-        }, LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1, LocalDate.now().getDayOfMonth());
-        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
+        DatePickerDialog startPickerDialog = getDatePicker(binding.dialogAddStartDateTv);
+        DatePickerDialog deadlinePickerDialog = getDatePicker(binding.dialogAddDeadlineDateTv);
+
 
         if (Objects.equals(this.getTag(), new Const().UPDATE_DIALOG)) {
             Bundle mArgs = getArguments();
@@ -88,9 +105,10 @@ public class AddDialog extends DialogFragment {
             binding.dialogAddTodoTitleEt.setText(oldTodo.getTitle());
             binding.dialogAddTodoContentEt.setText(oldTodo.getContent());
             binding.dialogAddDeadlineDateTv.setText(LocalDateUtils.getDateFullName(oldTodo.getDeadline()));
+            binding.dialogAddStartDateTv.setText(LocalDateUtils.getDateFullName(oldTodo.getStart()));
 
             LocalDate date = oldTodo.getDeadline();
-            datePickerDialog.updateDate(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
+            deadlinePickerDialog.updateDate(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
 
             //저장버튼 리스너
             updateOldTodo(oldTodo);
@@ -109,6 +127,9 @@ public class AddDialog extends DialogFragment {
 
             //데드라인 초기화
             binding.dialogAddDeadlineDateTv.setText(LocalDateUtils.getDateFullName(LocalDate.now()));
+            //시작일 초기화
+            binding.dialogAddStartDateTv.setText(LocalDateUtils.getDateFullName(LocalDate.now()));
+
             //라디오 버튼 선택 초기화
             binding.dialogAddColorSelectionRg.check(R.id.dialogAddColor1Rb);
 
@@ -122,9 +143,22 @@ public class AddDialog extends DialogFragment {
         //라디오 버튼 선택에 따라서 배경색 전환
         setTodoBackgroundColorListener();
 
-        //현재 날짜 기준으로 Date Picker 화면에 띄움
-        showDatePickerListener(datePickerDialog);
+        //현재 날짜 기준으로 Deadline Date Picker 화면에 띄움
+        showDatePickerListener(deadlinePickerDialog,binding.dialogAddDeadlinePickClo,binding.dialogAddDeadlineDateTv);
+        showDatePickerListener(startPickerDialog,binding.dialogAddStartClo,binding.dialogAddStartDateTv);
+
+
     }
+
+    //현재 날짜 기준으로 Date Picker 화면에 띄움
+    void showDatePickerListener(DatePickerDialog datePickerDialog,View view, TextView tv) {
+        view.setOnClickListener(v -> {
+            LocalDate date = LocalDateUtils.getDateFromFullName(tv.getText().toString());
+            datePickerDialog.updateDate(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
+            datePickerDialog.show();
+        });
+    }
+
     //원래 선택한 색상 확인하고 세팅
     void setOldBackgroundColor(int oldColor) {
         for (int childAt = 0; childAt < binding.dialogAddColorSelectionRg.getChildCount(); childAt++) {
@@ -164,7 +198,7 @@ public class AddDialog extends DialogFragment {
         });
     }
 
-    //저장버튼 리스너
+    //저장버튼 리스너(수정)
     void updateOldTodo(Todo oldTodo) {
         binding.dialogAddSaveBtn.setOnClickListener(v -> {
             LocalDate newDeadline = LocalDateUtils.getDateFromFullName(binding.dialogAddDeadlineDateTv.getText().toString());
@@ -173,15 +207,16 @@ public class AddDialog extends DialogFragment {
                             oldTodo.getId(),
                             binding.dialogAddItemClo.getBackgroundTintList().getDefaultColor(),
                             binding.dialogAddTodoTitleEt.getText().toString(),
-                            oldTodo.getStart(),
+                            LocalDateUtils.getDateFromFullName(binding.dialogAddStartDateTv.getText().toString()),
                             newDeadline,
-                            binding.dialogAddTodoContentEt.getText().toString()
+                            binding.dialogAddTodoContentEt.getText().toString(),
+                            false
                     )
             );
             dismiss();
         });
     }
-    //저장 버튼 리스너
+    //저장 버튼 리스너(새로 작성)
     void saveNewTodo() {
         binding.dialogAddSaveBtn.setOnClickListener(v -> {
             LocalDate newDeadline = LocalDateUtils.getDateFromFullName(binding.dialogAddDeadlineDateTv.getText().toString());
@@ -190,22 +225,16 @@ public class AddDialog extends DialogFragment {
                             0,
                             binding.dialogAddItemClo.getBackgroundTintList().getDefaultColor(),
                             binding.dialogAddTodoTitleEt.getText().toString(),
-                            LocalDate.now(),
+                            LocalDateUtils.getDateFromFullName(binding.dialogAddStartDateTv.getText().toString()),
                             newDeadline,
-                            binding.dialogAddTodoContentEt.getText().toString()
+                            binding.dialogAddTodoContentEt.getText().toString(),
+                            false
                     )
             );
             dismiss();
         });
     }
-    //현재 날짜 기준으로 Date Picker 화면에 띄움
-    void showDatePickerListener(DatePickerDialog datePickerDialog) {
-        binding.dialogAddDatePickClo.setOnClickListener(v -> {
-            LocalDate date = LocalDateUtils.getDateFromFullName(binding.dialogAddDeadlineDateTv.getText().toString());
-            datePickerDialog.updateDate(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
-            datePickerDialog.show();
-        });
-    }
+
 
     public void saveTodo(DialogFragmentSaveTodoListener listener) {
         dialogFragmentSaveTodoListener = listener;
